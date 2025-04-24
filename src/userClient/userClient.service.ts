@@ -37,13 +37,13 @@ export class UserClientService {
         'uc.cliente_id AS cliente_id',
         'uc.estado AS estado', //AGENDA
         'uc.usuario_id AS usuario_id',
-        `TO_CHAR(uc.fecha, 'YYYY-MM-DD HH24:MI:SS') AS fecha`,
+        `TO_CHAR(uc.fecha, 'YYYY-MM-DD HH24:MI:SS') AS fecha`, //se formatea la fecha para verse similar a la BD
         'uc.autorizacion_id AS autorizacion_id',
-        'c.nombre AS cliente_nombre', // Nombre del cliente' //AGENDA
-        'c.industria AS cliente_industria', // Industria del cliente'
+        'c.nombre AS cliente_nombre', //AGENDA
+        'c.industria AS cliente_industria',
         `TO_CHAR(c.fecha_registro, 'YYYY-MM-DD HH24:MI:SS') AS cliente_fechaR`,
       ])
-      .leftJoin('clientes', 'c', 'c.id = uc.cliente_id') // Usamos LEFT JOIN para no excluir los registros sin cliente
+      .leftJoin('clientes', 'c', 'c.id = uc.cliente_id')
       .where('uc.usuario_id = :usuario_id', { usuario_id })
       .andWhere('uc.fecha BETWEEN :inicio AND :fin', {
         inicio: inicioDia.toISOString(),

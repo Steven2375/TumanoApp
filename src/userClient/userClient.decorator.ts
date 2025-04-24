@@ -4,6 +4,6 @@ import { Request } from 'express';
 export const UserClient = createParamDecorator(
   (data: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Request>();
-    return request.user; // Ahora TypeScript debería reconocer la propiedad 'user'
+    return request.user;
   },
 );
