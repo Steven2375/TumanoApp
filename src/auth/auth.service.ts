@@ -1,8 +1,8 @@
 import { HttpException, Injectable, HttpCode } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/services/user.service';
 import { CreateUserDto } from './Dto/user.dto';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/Entities/user.entity';
 import { LoginDto } from './Dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 
@@ -36,12 +36,10 @@ export class AuthService {
   // Función para el login (inicio de sesión)
   @HttpCode(201)
   async sigIn(loginDto: LoginDto) {
-    const { identificacion_numero, contrasena } = loginDto;
+    const { CC, pasw, ubicacion, SO, Modelo, Imei } = loginDto;
 
-    // Buscar el usuario por nombre de usuario
-    const usuario = await this.userService.findByIdNumber(
-      identificacion_numero,
-    );
+    // Buscar el usuario por número de identificación
+    const usuario = await this.userService.findByIdNumber(parseInt(CC));
 
     // Si no existe, lanzar excepción
     if (!usuario) {
@@ -49,17 +47,30 @@ export class AuthService {
     }
 
     // Validar la contraseña con bcrypt
-    const validPassword = await bcrypt.compare(
-      contrasena,
-      usuario.contrasena_hash,
-    );
+    const validPassword = await bcrypt.compare(pasw, usuario.contrasena_hash);
 
     // Si la contraseña no es válida
     if (!validPassword) {
       throw new HttpException('PASSWORD_INCORRECT', 403);
     }
 
+    // Aquí puedes acceder a los nuevos datos:
+    console.log('Ubicación:', ubicacion);
+    console.log('Sistema Operativo:', SO);
+    console.log('Modelo del Dispositivo:', Modelo);
+    console.log('IMEI:', Imei);
+
+    // Puedes guardar esta información en tu base de datos si lo necesitas
     await this.userService.actualizarFechaLogin(usuario.id);
+    // Ejemplo de cómo podrías guardar la ubicación (necesitarías adaptar tu servicio de usuario)
+    await this.userService.guardarInformacionDispositivo(
+      usuario.id,
+      SO,
+      Modelo,
+      Imei,
+    );
+    await this.userService.guardarUbicacion(usuario.id, ubicacion);
+
     const payload = { id: usuario.id, name: usuario.nombre_usuario };
     const token = this.jwtAuthService.sign(payload);
     const data = { token };

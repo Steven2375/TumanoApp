@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Client } from './client.entity';
 import { Autorization } from './Autorization.entity';
-import { User } from 'src/user/user.entity';
+import { User } from 'src/Entities/user.entity';
 
 @Entity('usuario_cliente')
 export class UserClient {

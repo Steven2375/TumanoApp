@@ -6,8 +6,9 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Role } from '../Entities/rol.entity';
+import { Role } from './rol.entity';
 import { UserClient } from 'src/Entities/userClient.entity';
+import { UserDevice } from './userDevice';
 
 @Entity('usuarios') // Nombre de la tabla en la base de datos
 export class User {
@@ -44,4 +45,10 @@ export class User {
 
   @OneToMany(() => UserClient, (userClient) => userClient.usuario)
   userClients: UserClient[];
+
+  @OneToMany(
+    () => UserDevice,
+    (usuarioDispositivo) => usuarioDispositivo.usuarioId,
+  )
+  usuarioDispositivos: UserDevice[];
 }

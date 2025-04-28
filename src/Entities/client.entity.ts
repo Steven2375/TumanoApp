@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Service } from './service.entity';
 import { UserClient } from './userClient.entity';
@@ -26,6 +27,7 @@ export class Client {
   tiemporeingreso: number;
 
   @ManyToOne(() => Service, (service) => service.clients)
+  @JoinColumn({ name: 'servicio_id' })
   servicio_id: Service;
 
   @OneToMany(() => UserClient, (uc) => uc.cliente)

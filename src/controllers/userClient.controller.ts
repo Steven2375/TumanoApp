@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { UserClientService } from './userClient.service';
+import { UserClientService } from '../services/userClient.service';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { UserClient } from './userClient.decorator';
+import { UserClient } from '../userClient/userClient.decorator';
 import { JwtPayload } from 'jsonwebtoken';
 
 @Controller('userClient')

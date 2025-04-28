@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { User } from '../user/user.entity'; // Relación con la entidad de usuarios
+import { User } from './user.entity'; // Relación con la entidad de usuarios
 
 @Entity('roles') // Nombre de la tabla en la base de datos
 export class Role {
