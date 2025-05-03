@@ -7,24 +7,22 @@ interface RawData {
   cliente_id: string;
   cliente_nombre: string;
   cliente_industria: string;
-  cliente_fechaR: string; // O el tipo de fecha que esperas
+  cliente_fechaR: string;
   servicio_nombre: string;
   area_cliente_id: number;
   area_nombre: string;
   area_estado: string;
   insumo_id: number;
-  i_areacliente_id: number; // Permitimos null porque puede no existir
+  i_areacliente_id: number;
   i_nombre: string;
   i_unidad_medida: string;
   i_cantidad: number;
-  dpla_areaclienteid: number; // Permitimos null porque puede no existir
+  dpla_areaclienteid: number;
   dpla_diccionarioHallazgos: number | null;
   dispositivo_id: string;
   dpla_codigo: string;
   dpla_estado: string;
   dpla_clase_dispositivo_id: string;
-  // Permitimos null porque puede no existir
-  // ... incluye cualquier otra propiedad que pueda venir de la consulta
 }
 
 export interface ClienteAgrupado {
@@ -84,8 +82,8 @@ export class UserClientService {
     const queryBuilder = this.dataSource
       .createQueryBuilder(UserClient, 'uc')
       .select([
-        'c.id AS cliente_id', //AGENDA
-        'c.nombre AS cliente_nombre', //AGENDA
+        'c.id AS cliente_id',
+        'c.nombre AS cliente_nombre',
         'c.industria AS cliente_industria',
         `TO_CHAR(c.fecha_registro, 'YYYY-MM-DD HH24:MI:SS') AS cliente_fechaR`,
         's.nombre AS servicio_nombre',
@@ -114,10 +112,6 @@ export class UserClientService {
         inicio: inicioDia.toISOString(),
         fin: finDia.toISOString(),
       });
-
-    // const [sql, params] = queryBuilder.getQueryAndParameters();
-    // console.log('Consulta SQL:', sql);
-    // console.log('Parámetros:', params);
 
     // Ejecutar consulta
     const datos: RawData[] = await queryBuilder.getRawMany();

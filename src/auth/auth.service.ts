@@ -6,6 +6,12 @@ import { User } from 'src/Entities/user.entity';
 import { LoginDto } from './Dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
 
+export interface UserResponse {
+  id: number;
+  name: string;
+  email: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -65,13 +71,17 @@ export class AuthService {
 
     const payload = { id: usuario.id, name: usuario.nombre_usuario };
     const token = this.jwtAuthService.sign(payload);
-    const data = { token };
+
+    const userResponse: UserResponse = {
+      id: usuario.id,
+      name: usuario.nombre_usuario,
+      email: usuario.correo_electronico,
+    };
 
     // Login exitoso
     return {
-      mensaje: 'Login exitoso',
-      data,
-      usuario,
+      token,
+      userResponse,
     };
   }
 }
