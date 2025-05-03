@@ -21,10 +21,10 @@ import { Device } from './Entities/device.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.BD_HOST,
-      port: Number(process.env.BD_PORT), // Puerto de PostgreSQL (por defecto es 5432)
-      username: process.env.BD_USER, // Usuario de la base de datos
-      password: process.env.BD_PASSWORD, // Contraseña de la base de datos
-      database: process.env.BD_NAME, // Nombre de la base de datos
+      port: Number(process.env.BD_PORT),
+      username: process.env.BD_USER,
+      password: process.env.BD_PASSWORD,
+      database: process.env.BD_NAME,
       entities: [
         User,
         Role,
