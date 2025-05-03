@@ -49,7 +49,7 @@ export class AuthService {
 
     // Si no existe, lanzar excepción
     if (!usuario) {
-      throw new HttpException('USER_NOT_FOUND', 404);
+      throw new HttpException('Credenciales invalidas', 401);
     }
 
     // Validar la contraseña con bcrypt
@@ -57,7 +57,7 @@ export class AuthService {
 
     // Si la contraseña no es válida
     if (!validPassword) {
-      throw new HttpException('PASSWORD_INCORRECT', 403);
+      throw new HttpException('Credenciales invalidas', 401);
     }
 
     await this.userService.actualizarFechaLogin(usuario.id);
