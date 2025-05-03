@@ -101,9 +101,11 @@ export class UserService {
     return await this.userRepo.save(usuario); // Guardamos los cambios
   }
 
-  async actualizarFechaLoginDevice(dispositivoId: number): Promise<UserDevice> {
+  async actualizarFechaLoginDevice(
+    dispositivoMovilId: number,
+  ): Promise<UserDevice> {
     const device = await this.userDeviceRepo.findOne({
-      where: { dispositivoId },
+      where: { dispositivoMovilId },
     });
 
     if (!device) {
@@ -146,23 +148,22 @@ export class UserService {
     modelo: string,
     imei: string,
   ): Promise<UserDevice> {
-    // Primero, intenta encontrar un dispositivo existente por su IMEI
     let dispositivo = await this.deviceRepo.findOne({
-      where: { sistema_operativo: so, tipo: modelo },
-    }); // Considera si el IMEI es la mejor forma de identificar un dispositivo único
-
+      where: { IMEI: imei },
+    });
     // Si no existe, crea un nuevo dispositivo
     if (!dispositivo) {
       dispositivo = this.deviceRepo.create({
         sistema_operativo: so,
-        tipo: modelo,
+        modelo: modelo,
+        IMEI: imei,
       });
       dispositivo = await this.deviceRepo.save(dispositivo);
     }
 
     // Luego, crea o actualiza la relación en la tabla usuarios_dispositivos
     const usuarioDispositivo = await this.userDeviceRepo.findOne({
-      where: { usuarioId: userId, dispositivoId: dispositivo.id },
+      where: { usuarioId: userId, dispositivoMovilId: dispositivo.id },
       order: { fechaLogin: 'DESC' }, // Obtener el registro más reciente para este usuario y dispositivo
     });
 
@@ -175,8 +176,7 @@ export class UserService {
     // Si no existe, crea un nuevo registro de usuario-dispositivo
     const nuevoRegistro = this.userDeviceRepo.create({
       usuarioId: userId,
-      dispositivoId: dispositivo.id,
-      direccionIp: imei,
+      dispositivoMovilId: dispositivo.id,
     });
     return this.userDeviceRepo.save(nuevoRegistro);
   }

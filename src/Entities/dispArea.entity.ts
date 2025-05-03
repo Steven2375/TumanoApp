@@ -8,8 +8,8 @@ import {
 import { AreasClient } from './areasClient.entity';
 import { DiccionarioHallazgos } from './diccionarioHallazgos.entity';
 
-@Entity('dispositivos_area')
-export class DispositivosArea {
+@Entity('dispositivos_plagas')
+export class DispositivosPlagas {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -18,6 +18,15 @@ export class DispositivosArea {
 
   @Column({ name: 'diccionario_hallazgos_id', nullable: false })
   dicHallazgos_id: number;
+
+  @Column({ name: 'codigo', nullable: false })
+  codigo: string;
+
+  @Column({ name: 'estado', nullable: false })
+  estado: string;
+
+  @Column({ name: 'clase_dispositivo_plaga_id', nullable: false })
+  clase_id: string;
 
   @ManyToOne(() => AreasClient, { nullable: false })
   @JoinColumn({ name: 'areacliente_id' })

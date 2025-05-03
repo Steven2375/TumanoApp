@@ -54,15 +54,7 @@ export class AuthService {
       throw new HttpException('PASSWORD_INCORRECT', 403);
     }
 
-    // Aquí puedes acceder a los nuevos datos:
-    console.log('Ubicación:', ubicacion);
-    console.log('Sistema Operativo:', SO);
-    console.log('Modelo del Dispositivo:', Modelo);
-    console.log('IMEI:', Imei);
-
-    // Puedes guardar esta información en tu base de datos si lo necesitas
     await this.userService.actualizarFechaLogin(usuario.id);
-    // Ejemplo de cómo podrías guardar la ubicación (necesitarías adaptar tu servicio de usuario)
     await this.userService.guardarInformacionDispositivo(
       usuario.id,
       SO,
@@ -79,6 +71,7 @@ export class AuthService {
     return {
       mensaje: 'Login exitoso',
       data,
+      usuario,
     };
   }
 }

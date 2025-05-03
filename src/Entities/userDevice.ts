@@ -14,8 +14,8 @@ export class UserDevice {
   @PrimaryColumn({ name: 'usuario_id' })
   usuarioId: number;
 
-  @PrimaryColumn({ name: 'dispositivo_id' })
-  dispositivoId: number;
+  @PrimaryColumn({ name: 'dispositivo_movil_id' })
+  dispositivoMovilId: number;
 
   @CreateDateColumn({
     type: 'timestamp',
@@ -24,13 +24,10 @@ export class UserDevice {
   })
   fechaLogin: Date;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'direccion_ip' })
-  direccionIp: string;
-
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'latitud' })
+  @Column({ type: 'varchar', length: 50, nullable: false, name: 'latitud' })
   latitud: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true, name: 'longitud' })
+  @Column({ type: 'varchar', length: 50, nullable: false, name: 'longitud' })
   longitud: string;
 
   @ManyToOne(() => User, (usuario) => usuario.usuarioDispositivos, {
@@ -42,6 +39,6 @@ export class UserDevice {
   @ManyToOne(() => Device, (dispositivo) => dispositivo.usuarioDispositivos, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'dispositivo_id' })
-  dispositivo: Device;
+  @JoinColumn({ name: 'dispositivo_movil_id' })
+  dispositivoMovil: Device;
 }
