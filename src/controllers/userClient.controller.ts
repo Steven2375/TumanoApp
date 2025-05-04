@@ -1,12 +1,13 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { UserClientService } from '../services/userClient.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import {
   UserClient,
   UserClientPayload,
 } from '../userClient/userClient.decorator';
+import { UbicacionDto } from 'src/auth/Dto/login.dto';
 
-@Controller('userClient')
+@Controller('sync')
 export class UserClientController {
   userClientService: UserClientService;
   constructor(userClientService: UserClientService) {
@@ -18,11 +19,22 @@ export class UserClientController {
     return 'hola';
   }
   @UseGuards(AuthGuard)
-  @Get('agenda')
-  async getAgenda(@UserClient() user: UserClientPayload) {
+  @Post('data')
+  async getAgenda(
+    @UserClient() user: UserClientPayload,
+    @Body() ubicacionDto: UbicacionDto,
+  ) {
     const usuario_id = user.id;
     const fecha = new Date();
+    const IMEI = user.imei;
+    console.log(ubicacionDto);
+    console.log(IMEI);
 
-    return this.userClientService.obtenerAgenda(usuario_id, fecha);
+    return this.userClientService.obtenerAgenda(
+      usuario_id,
+      fecha,
+      IMEI,
+      ubicacionDto,
+    );
   }
 }

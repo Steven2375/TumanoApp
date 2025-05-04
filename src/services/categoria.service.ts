@@ -1,0 +1,125 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { Categoria } from 'src/Entities/categoria.entity';
+
+// Define the interface here, outside the class
+export interface CategoriasAgrupadas {
+  dispositivos: {
+    categoriasDispositivo: {
+      id: number;
+      nombre: string;
+      valores: string[];
+    }[];
+  };
+  areas: {
+    categoriasArea: {
+      id: number;
+      nombre: string;
+      valores: string[];
+    }[];
+  };
+}
+
+// Define una interfaz para los resultados de la consulta
+export interface ResultadoConsulta {
+  categoria_id: number;
+  categoria_nombre: string;
+  diccionario_valor: string | null; // Permite valores null
+  contexto_aplica_a: string;
+}
+
+@Injectable()
+export class CategoriasService {
+  constructor(
+    @InjectRepository(Categoria)
+    private categoriasRepository: Repository<Categoria>,
+    private dataSource: DataSource,
+  ) {}
+
+  async obtenerCategorias(): Promise<CategoriasAgrupadas> {
+    try {
+      const resultados: ResultadoConsulta[] = await this.dataSource
+        .createQueryBuilder(Categoria, 'cat')
+        .select([
+          'cat.id AS categoria_id',
+          'cat.nombre AS categoria_nombre',
+          'dc.valor AS diccionario_valor',
+          'cc.aplica_a AS contexto_aplica_a',
+        ])
+        .leftJoin('dato_categoria', 'dc', 'cat.id = dc.categoria_id')
+        .leftJoin('categoria_contexto', 'cc', 'cat.id = cc.categoria_id')
+        .getRawMany();
+
+      const categoriasAgrupadas: CategoriasAgrupadas = {
+        dispositivos: { categoriasDispositivo: [] },
+        areas: { categoriasArea: [] },
+      };
+
+      const dispositivosMap: Map<
+        number,
+        { id: number; nombre: string; valores: Set<string> }
+      > = new Map();
+      const areasMap: Map<
+        number,
+        { id: number; nombre: string; valores: Set<string> }
+      > = new Map();
+
+      for (const resultado of resultados) {
+        if (resultado.contexto_aplica_a === 'Dispositivo') {
+          if (!dispositivosMap.has(resultado.categoria_id)) {
+            dispositivosMap.set(resultado.categoria_id, {
+              id: resultado.categoria_id,
+              nombre: resultado.categoria_nombre,
+              valores: new Set<string>(),
+            });
+          }
+          if (resultado.diccionario_valor) {
+            dispositivosMap
+              .get(resultado.categoria_id)!
+              .valores.add(resultado.diccionario_valor);
+          }
+        } else if (resultado.contexto_aplica_a === 'Área') {
+          if (!areasMap.has(resultado.categoria_id)) {
+            areasMap.set(resultado.categoria_id, {
+              id: resultado.categoria_id,
+              nombre: resultado.categoria_nombre,
+              valores: new Set<string>(),
+            });
+          }
+          if (resultado.diccionario_valor) {
+            areasMap
+              .get(resultado.categoria_id)!
+              .valores.add(resultado.diccionario_valor);
+          }
+        }
+      }
+
+      categoriasAgrupadas.dispositivos.categoriasDispositivo = Array.from(
+        dispositivosMap.values(),
+      ).map((cat) => ({
+        id: cat.id,
+        nombre: cat.nombre,
+        valores: Array.from(cat.valores),
+      }));
+
+      categoriasAgrupadas.areas.categoriasArea = Array.from(
+        areasMap.values(),
+      ).map((cat) => ({
+        id: cat.id,
+        nombre: cat.nombre,
+        valores: Array.from(cat.valores),
+      }));
+
+      return categoriasAgrupadas;
+    } catch (error) {
+      console.error(
+        'Error al obtener las categorías con detalles (JOIN y selección):',
+        error,
+      );
+      throw new Error(
+        'No se pudieron obtener las categorías con detalles (JOIN y selección).',
+      );
+    }
+  }
+}

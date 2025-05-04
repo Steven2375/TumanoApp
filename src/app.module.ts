@@ -12,12 +12,17 @@ import { Client } from './Entities/client.entity';
 import { UserClientModule } from './modules/userClient.module';
 import { UserDevice } from './Entities/userDevice';
 import { Device } from './Entities/device.entity';
+import { CategoriasModule } from './modules/categoria.module';
+import { Categoria } from './Entities/categoria.entity';
+import { CategoriaContexto } from './Entities/categoriaContexto.entity';
+import { DatosCategoria } from './Entities/datoCategoria';
 
 @Module({
   imports: [
     AuthModule,
     UserModule,
     UserClientModule,
+    CategoriasModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.BD_HOST,
@@ -34,6 +39,9 @@ import { Device } from './Entities/device.entity';
         Client,
         UserDevice,
         Device,
+        Categoria,
+        CategoriaContexto,
+        DatosCategoria,
       ],
     }),
     TypeOrmModule.forFeature([User, Role]),

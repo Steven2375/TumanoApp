@@ -6,7 +6,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { AreasClient } from './areasClient.entity';
-import { DiccionarioHallazgos } from './diccionarioHallazgos.entity';
+import { DatosCategoria } from './datoCategoria';
 
 @Entity('dispositivos_plagas')
 export class DispositivosPlagas {
@@ -32,7 +32,7 @@ export class DispositivosPlagas {
   @JoinColumn({ name: 'areacliente_id' })
   areacliente: AreasClient;
 
-  @ManyToOne(() => DiccionarioHallazgos, { nullable: false })
-  @JoinColumn({ name: 'diccionario_hallazgos_id' })
-  diccionario: DiccionarioHallazgos;
+  @ManyToOne(() => DatosCategoria, { nullable: false })
+  @JoinColumn({ name: 'dato_categoria_id' })
+  dato_categoria: DatosCategoria;
 }

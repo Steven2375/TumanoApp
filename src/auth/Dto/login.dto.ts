@@ -21,7 +21,7 @@ export class UbicacionDto {
   @IsNumber()
   precision?: number;
 
-  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   timestamp?: string;
 }

@@ -4,7 +4,7 @@ import { JwtPayload } from 'jsonwebtoken';
 
 export interface UserClientPayload extends JwtPayload {
   id: number;
-  fecha: string;
+  imei: string;
 }
 
 export const UserClient = createParamDecorator(

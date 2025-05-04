@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { UserClient } from 'src/Entities/userClient.entity';
+import { UbicacionDto } from 'src/auth/Dto/login.dto';
+import { UserDevice } from 'src/Entities/userDevice';
+import { Device } from 'src/Entities/device.entity';
 
 interface RawData {
   cliente_id: string;
@@ -57,9 +60,18 @@ export class UserClientService {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    @InjectRepository(UserDevice) // Inyectar el repositorio de UserDevice
+    private readonly userDeviceRepository: Repository<UserDevice>,
+    @InjectRepository(Device) // Inyectar el repositorio de Device
+    private readonly deviceRepository: Repository<Device>,
   ) {}
 
-  async obtenerAgenda(usuario_id: number, fecha: Date) {
+  async obtenerAgenda(
+    usuario_id: number,
+    fecha: Date,
+    IMEI: string,
+    ubicacionDto?: UbicacionDto,
+  ) {
     const inicioDia = new Date(
       fecha.getFullYear(),
       fecha.getMonth(),
@@ -77,6 +89,10 @@ export class UserClientService {
       59,
       999,
     );
+
+    console.log(ubicacionDto);
+    console.log(IMEI);
+    console.log(fecha);
 
     // Se crea y guarda el query builder en una variable
     const queryBuilder = this.dataSource
@@ -116,6 +132,40 @@ export class UserClientService {
     // Ejecutar consulta
     const datos: RawData[] = await queryBuilder.getRawMany();
     const clientesAgrupados: { [clienteId: string]: ClienteAgrupado } = {};
+
+    const imei = IMEI;
+
+    if (!ubicacionDto) {
+      throw new Error(`No se encontró dto para el usuario ${usuario_id}`);
+    }
+
+    if (!imei) {
+      throw new Error(
+        `No se encontró IMEI para el usuario ${usuario_id} en el DTO`,
+      );
+    }
+
+    // Buscar el dispositivo por IMEI
+    const dispositivo = await this.deviceRepository.findOne({
+      where: { IMEI: imei },
+    });
+
+    if (!dispositivo) {
+      throw new Error(
+        `No se encontró dispositivo con IMEI ${imei} en la base de datos`,
+      );
+    }
+    const dispositivoMovilId = dispositivo.id;
+
+    // Siempre crear un nuevo registro
+    const newUserDevice = this.userDeviceRepository.create({
+      usuarioId: usuario_id,
+      dispositivoMovilId: dispositivoMovilId,
+      latitud: ubicacionDto.latitud.toString(),
+      longitud: ubicacionDto.longitud.toString(),
+      fechaLogin: fecha,
+    });
+    await this.userDeviceRepository.save(newUserDevice);
 
     for (const dato of datos) {
       if (!clientesAgrupados[dato.cliente_id]) {

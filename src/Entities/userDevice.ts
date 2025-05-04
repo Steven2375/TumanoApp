@@ -1,11 +1,4 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Device } from './device.entity';
 
@@ -17,9 +10,8 @@ export class UserDevice {
   @PrimaryColumn({ name: 'dispositivo_movil_id' })
   dispositivoMovilId: number;
 
-  @CreateDateColumn({
+  @PrimaryColumn({
     type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
     name: 'fecha_login',
   })
   fechaLogin: Date;

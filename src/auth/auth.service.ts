@@ -69,7 +69,11 @@ export class AuthService {
     );
     await this.userService.guardarUbicacion(usuario.id, ubicacion);
 
-    const payload = { id: usuario.id, name: usuario.nombre_usuario };
+    const payload = {
+      id: usuario.id,
+      name: usuario.nombre_usuario,
+      imei: Imei,
+    };
     const token = this.jwtAuthService.sign(payload);
 
     const userResponse: UserResponse = {

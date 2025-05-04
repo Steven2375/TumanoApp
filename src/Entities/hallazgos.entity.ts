@@ -6,7 +6,7 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { AreasClient } from './areasClient.entity';
-import { DiccionarioHallazgos } from './diccionarioHallazgos.entity';
+import { DatosCategoria } from './datoCategoria';
 
 @Entity('hallazgos')
 export class Hallazgos {
@@ -23,7 +23,7 @@ export class Hallazgos {
   @JoinColumn({ name: 'areacliente_id' })
   areacliente: AreasClient;
 
-  @ManyToOne(() => DiccionarioHallazgos, { nullable: false })
+  @ManyToOne(() => DatosCategoria, { nullable: false })
   @JoinColumn({ name: 'diccionario_hallazgos_id' })
-  diccionario: DiccionarioHallazgos;
+  diccionario: DatosCategoria;
 }
