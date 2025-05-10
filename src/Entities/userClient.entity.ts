@@ -19,7 +19,7 @@ export class UserClient {
   cliente_id: number;
 
   @Column({ default: true })
-  estado: boolean;
+  estado: string;
 
   @Column()
   usuario_id: number;

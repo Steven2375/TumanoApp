@@ -7,7 +7,7 @@ export class Autorization {
   id: number;
 
   @Column()
-  url_firma: number;
+  url_firma: string;
 
   @Column({ type: 'timestamp', nullable: true })
   fecha: Date;

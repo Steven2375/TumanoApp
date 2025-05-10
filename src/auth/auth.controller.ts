@@ -12,6 +12,7 @@ export class AuthController {
     this.authService = authService;
   }
 
+  // Endpoint para probar generacion del token en login
   @UseGuards(AuthGuard)
   @Get()
   getAllAuth() {

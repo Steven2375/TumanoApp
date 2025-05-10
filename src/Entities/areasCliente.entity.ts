@@ -19,6 +19,9 @@ export class AreasClient {
   @Column({ name: 'cliente_id', nullable: false })
   cliente_id: number;
 
+  @Column({ name: 'url_area', nullable: false })
+  urlArea: string;
+
   @ManyToOne(() => Client, { nullable: false })
   @JoinColumn({ name: 'cliente_id' })
   client: Client;

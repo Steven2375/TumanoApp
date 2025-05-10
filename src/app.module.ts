@@ -16,6 +16,7 @@ import { CategoriasModule } from './modules/categoria.module';
 import { Categoria } from './Entities/categoria.entity';
 import { CategoriaContexto } from './Entities/categoriaContexto.entity';
 import { DatosCategoria } from './Entities/datoCategoria';
+import { CheckList } from './Entities/checkList.entity';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { DatosCategoria } from './Entities/datoCategoria';
         Categoria,
         CategoriaContexto,
         DatosCategoria,
+        CheckList,
       ],
     }),
     TypeOrmModule.forFeature([User, Role]),

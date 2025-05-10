@@ -3,29 +3,29 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Categoria } from 'src/Entities/categoria.entity';
 
-// Define the interface here, outside the class
 export interface CategoriasAgrupadas {
   dispositivos: {
     categoriasDispositivo: {
       id: number;
       nombre: string;
-      valores: string[];
+      valores: { id: number; nombre: string }[];
     }[];
   };
   areas: {
     categoriasArea: {
       id: number;
       nombre: string;
-      valores: string[];
+      valores: { id: number; nombre: string }[];
     }[];
   };
 }
 
 // Define una interfaz para los resultados de la consulta
-export interface ResultadoConsulta {
+interface ResultadoConsulta {
   categoria_id: number;
   categoria_nombre: string;
-  diccionario_valor: string | null; // Permite valores null
+  diccionario_id: number;
+  diccionario_valor: string;
   contexto_aplica_a: string;
 }
 
@@ -44,13 +44,15 @@ export class CategoriasService {
         .select([
           'cat.id AS categoria_id',
           'cat.nombre AS categoria_nombre',
+          'dc.id AS diccionario_id',
           'dc.valor AS diccionario_valor',
           'cc.aplica_a AS contexto_aplica_a',
         ])
         .leftJoin('dato_categoria', 'dc', 'cat.id = dc.categoria_id')
         .leftJoin('categoria_contexto', 'cc', 'cat.id = cc.categoria_id')
+        .orderBy('cat.id, dc.id')
         .getRawMany();
-
+      console.log(resultados);
       const categoriasAgrupadas: CategoriasAgrupadas = {
         dispositivos: { categoriasDispositivo: [] },
         areas: { categoriasArea: [] },
@@ -58,11 +60,19 @@ export class CategoriasService {
 
       const dispositivosMap: Map<
         number,
-        { id: number; nombre: string; valores: Set<string> }
+        {
+          id: number;
+          nombre: string;
+          valores: { id: number; nombre: string }[];
+        }
       > = new Map();
       const areasMap: Map<
         number,
-        { id: number; nombre: string; valores: Set<string> }
+        {
+          id: number;
+          nombre: string;
+          valores: { id: number; nombre: string }[];
+        }
       > = new Map();
 
       for (const resultado of resultados) {
@@ -71,26 +81,28 @@ export class CategoriasService {
             dispositivosMap.set(resultado.categoria_id, {
               id: resultado.categoria_id,
               nombre: resultado.categoria_nombre,
-              valores: new Set<string>(),
+              valores: [],
             });
           }
           if (resultado.diccionario_valor) {
-            dispositivosMap
-              .get(resultado.categoria_id)!
-              .valores.add(resultado.diccionario_valor);
+            dispositivosMap.get(resultado.categoria_id)!.valores.push({
+              id: resultado.diccionario_id,
+              nombre: resultado.diccionario_valor,
+            });
           }
         } else if (resultado.contexto_aplica_a === 'Área') {
           if (!areasMap.has(resultado.categoria_id)) {
             areasMap.set(resultado.categoria_id, {
               id: resultado.categoria_id,
               nombre: resultado.categoria_nombre,
-              valores: new Set<string>(),
+              valores: [],
             });
           }
           if (resultado.diccionario_valor) {
-            areasMap
-              .get(resultado.categoria_id)!
-              .valores.add(resultado.diccionario_valor);
+            areasMap.get(resultado.categoria_id)!.valores.push({
+              id: resultado.diccionario_id,
+              nombre: resultado.diccionario_valor,
+            });
           }
         }
       }
@@ -100,7 +112,7 @@ export class CategoriasService {
       ).map((cat) => ({
         id: cat.id,
         nombre: cat.nombre,
-        valores: Array.from(cat.valores),
+        valores: cat.valores,
       }));
 
       categoriasAgrupadas.areas.categoriasArea = Array.from(
@@ -108,7 +120,7 @@ export class CategoriasService {
       ).map((cat) => ({
         id: cat.id,
         nombre: cat.nombre,
-        valores: Array.from(cat.valores),
+        valores: cat.valores,
       }));
 
       return categoriasAgrupadas;

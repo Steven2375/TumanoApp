@@ -5,7 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { AreasClient } from './areasClient.entity';
+import { AreasClient } from './areasCliente.entity';
 
 @Entity('insumos')
 export class Insumos {

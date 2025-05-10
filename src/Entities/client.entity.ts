@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Service } from './service.entity';
 import { UserClient } from './userClient.entity';
+import { CheckList } from './checkList.entity';
 
 @Entity('clientes')
 export class Client {
@@ -29,6 +30,10 @@ export class Client {
   @ManyToOne(() => Service, (service) => service.clients)
   @JoinColumn({ name: 'servicio_id' })
   servicio_id: Service;
+
+  // Relación OneToMany con CheckList
+  @OneToMany(() => CheckList, (checkList) => checkList.cliente)
+  checkLists: CheckList[];
 
   @OneToMany(() => UserClient, (uc) => uc.cliente)
   userClients: UserClient[];

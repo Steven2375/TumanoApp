@@ -10,7 +10,7 @@ interface RawData {
   cliente_id: string;
   cliente_nombre: string;
   cliente_industria: string;
-  cliente_fechaR: string;
+  cliente_tiempo_reingreso: string;
   servicio_nombre: string;
   area_cliente_id: number;
   area_nombre: string;
@@ -26,13 +26,15 @@ interface RawData {
   dpla_codigo: string;
   dpla_estado: string;
   dpla_clase_dispositivo_id: string;
+  check_list_id: number;
+  check_list_item: string;
 }
 
 export interface ClienteAgrupado {
   id: string;
   nombre: string;
   industria: string;
-  fecha_registro: string;
+  tiempoReingreso: string;
   servicio: string;
   areas: {
     id: number;
@@ -52,6 +54,9 @@ export interface ClienteAgrupado {
       estado: string;
       clase_dispositivo_plaga_id: string;
     }[];
+  }[];
+  checklist: {
+    item: string;
   }[];
 }
 
@@ -90,10 +95,6 @@ export class UserClientService {
       999,
     );
 
-    console.log(ubicacionDto);
-    console.log(IMEI);
-    console.log(fecha);
-
     // Se crea y guarda el query builder en una variable
     const queryBuilder = this.dataSource
       .createQueryBuilder(UserClient, 'uc')
@@ -101,6 +102,7 @@ export class UserClientService {
         'c.id AS cliente_id',
         'c.nombre AS cliente_nombre',
         'c.industria AS cliente_industria',
+        'c.tiemporeingreso AS cliente_tiempo_reingreso',
         `TO_CHAR(c.fecha_registro, 'YYYY-MM-DD HH24:MI:SS') AS cliente_fechaR`,
         's.nombre AS servicio_nombre',
         'ac.id AS area_cliente_id',
@@ -117,12 +119,15 @@ export class UserClientService {
         'dpla.codigo AS dpla_codigo',
         'dpla.estado AS dpla_estado',
         'dpla.clase_dispositivo_plaga_id AS dpla_clase',
+        'cl.id AS check_list_id',
+        'cl.item AS check_list_item',
       ])
       .leftJoin('clientes', 'c', 'c.id = uc.cliente_id')
       .leftJoin('servicio', 's', 's.id = c.servicio_id')
       .leftJoin('areascliente', 'ac', 'ac.cliente_id = c.id')
       .leftJoin('insumos', 'i', 'i.areacliente_id =  ac.id')
       .leftJoin('dispositivos_plagas', 'dpla', 'dpla.areacliente_id = ac.id')
+      .leftJoin('check_list', 'cl', 'c.id = cl.clientes_id')
       .where('uc.usuario_id = :usuario_id', { usuario_id })
       .andWhere('uc.fecha BETWEEN :inicio AND :fin', {
         inicio: inicioDia.toISOString(),
@@ -132,6 +137,8 @@ export class UserClientService {
     // Ejecutar consulta
     const datos: RawData[] = await queryBuilder.getRawMany();
     const clientesAgrupados: { [clienteId: string]: ClienteAgrupado } = {};
+
+    console.log(datos);
 
     const imei = IMEI;
 
@@ -173,9 +180,10 @@ export class UserClientService {
           id: dato.cliente_id,
           nombre: dato.cliente_nombre,
           industria: dato.cliente_industria,
-          fecha_registro: dato.cliente_fechaR,
+          tiempoReingreso: dato.cliente_tiempo_reingreso,
           servicio: dato.servicio_nombre,
           areas: [],
+          checklist: [],
         };
       }
 
@@ -229,6 +237,16 @@ export class UserClientService {
             });
           }
         }
+        if (dato.check_list_id) {
+          const checklistExistente = clienteAgrupado.checklist.find(
+            (item) => item.item === dato.check_list_item, // Comparamos por el 'item'
+          );
+          if (!checklistExistente) {
+            clienteAgrupado.checklist.push({
+              item: dato.check_list_item,
+            });
+          }
+        }
       }
     }
 
@@ -237,8 +255,9 @@ export class UserClientService {
         id: cliente.id,
         nombre: cliente.nombre,
         industria: cliente.industria,
-        fecha_registro: cliente.fecha_registro,
+        tiemporeingreso: cliente.tiempoReingreso,
         servicio: cliente.servicio,
+        checklist: cliente.checklist,
         areas: cliente.areas.map((area) => ({
           nombre: area.nombre,
           estado: area.estado,

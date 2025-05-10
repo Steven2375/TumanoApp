@@ -5,7 +5,7 @@ import {
   JoinColumn,
   ManyToOne,
 } from 'typeorm';
-import { AreasClient } from './areasClient.entity';
+import { AreasClient } from './areasCliente.entity';
 import { DatosCategoria } from './datoCategoria';
 
 @Entity('dispositivos_plagas')
@@ -27,6 +27,9 @@ export class DispositivosPlagas {
 
   @Column({ name: 'clase_dispositivo_plaga_id', nullable: false })
   clase_id: string;
+
+  @Column({ name: 'url_dispositivo', nullable: false })
+  urlDispositivo: string;
 
   @ManyToOne(() => AreasClient, { nullable: false })
   @JoinColumn({ name: 'areacliente_id' })
