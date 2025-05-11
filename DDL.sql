@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS public.categoria_diccionario CASCADE;
 DROP TABLE IF EXISTS public.categoria CASCADE;
 DROP TABLE IF EXISTS public.dato_categoria CASCADE;
 DROP TABLE IF EXISTS public.categoria_contexto CASCADE;
+DROP TABLE IF EXISTS public.hallazgos_datoCategoria CASCADE;
 
 -- Crear secuencias necesarias
 CREATE SEQUENCE IF NOT EXISTS areascliente_id_seq;
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public.areascliente
     nombre character varying(255) COLLATE pg_catalog."default" NOT NULL,
     estado character varying(255) COLLATE pg_catalog."default" NOT NULL,
     cliente_id character varying(10) COLLATE pg_catalog."default" NOT NULL,
-    url_area character varying COLLATE pg_catalog."default",
+    url_area text COLLATE pg_catalog."default",
     CONSTRAINT areascliente_pkey PRIMARY KEY (id)
 );
 
@@ -55,7 +56,7 @@ DROP TABLE IF EXISTS public.autorizacion;
 CREATE TABLE IF NOT EXISTS public.autorizacion
 (
     id integer NOT NULL DEFAULT nextval('autorizacion_id_seq'::regclass),
-    url_firma character varying COLLATE pg_catalog."default" NOT NULL,
+    url_firma text COLLATE pg_catalog."default" NOT NULL,
     fecha timestamp without time zone,
     nombre character varying(50) COLLATE pg_catalog."default",
     telefono character varying(50) COLLATE pg_catalog."default",
@@ -88,7 +89,7 @@ DROP TABLE IF EXISTS public.check_list;
 CREATE TABLE IF NOT EXISTS public.check_list
 (
     id integer NOT NULL DEFAULT nextval('check_list_id_seq'::regclass),
-    nombre character varying COLLATE pg_catalog."default",
+    item character varying COLLATE pg_catalog."default",
     estado character varying COLLATE pg_catalog."default" NOT NULL,
     clientes_id character varying(10) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT check_list_pkey PRIMARY KEY (id)
@@ -151,7 +152,7 @@ CREATE TABLE IF NOT EXISTS public.dispositivos_plagas
     codigo character varying COLLATE pg_catalog."default" NOT NULL,
     estado character varying COLLATE pg_catalog."default" NOT NULL,
     clase_dispositivo_plaga_id character varying COLLATE pg_catalog."default",
-    url_dispositivo character varying COLLATE pg_catalog."default",
+    url_dispositivo text COLLATE pg_catalog."default",
     CONSTRAINT dispositivos_plagas_pkey PRIMARY KEY (id)
 );
 
@@ -161,11 +162,21 @@ CREATE TABLE IF NOT EXISTS public.hallazgos
 (
     id integer NOT NULL DEFAULT nextval('hallazgos_id_seq'::regclass),
     areacliente_id integer NOT NULL,
-    dato_categoria_id integer NOT NULL,
-    url_hallazgo character varying COLLATE pg_catalog."default",
+    "dispositivoP_id" character varying COLLATE pg_catalog."default",
+    url_hallazgo text COLLATE pg_catalog."default",
+    observaciones text COLLATE pg_catalog."default",
+    fecha_registro timestamp without time zone,
     CONSTRAINT hallazgos_pkey PRIMARY KEY (id),
-    CONSTRAINT hallazgos_areacliente_id_key UNIQUE (areacliente_id),
-    CONSTRAINT hallazgos_diccionario_hallazgos_id_key UNIQUE (dato_categoria_id)
+    CONSTRAINT hallazgos_areacliente_id_key UNIQUE (areacliente_id)
+);
+
+DROP TABLE IF EXISTS public."hallazgos_datoCategoria";
+
+CREATE TABLE IF NOT EXISTS public."hallazgos_datoCategoria"
+(
+    hallazgo_id integer NOT NULL,
+    dato_categoria_id integer NOT NULL,
+    CONSTRAINT "hallazgo_datoCategoria_pkey" PRIMARY KEY (hallazgo_id, dato_categoria_id)
 );
 
 DROP TABLE IF EXISTS public.insumos;
@@ -280,14 +291,6 @@ ALTER TABLE IF EXISTS public.clientes_hallazgos
     ON DELETE CASCADE;
 
 
-ALTER TABLE IF EXISTS public.clientes_hallazgos
-    ADD CONSTRAINT clientes_hallazgos_hallazgos_id_fkey FOREIGN KEY (hallazgo_id)
-    REFERENCES public.hallazgos (id) MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
 ALTER TABLE IF EXISTS public.dato_categoria
     ADD CONSTRAINT dato_categoria_categoria_id_fkey FOREIGN KEY (categoria_id)
     REFERENCES public.categoria (id) MATCH SIMPLE
@@ -319,12 +322,27 @@ CREATE INDEX IF NOT EXISTS hallazgos_areacliente_id_key
 
 
 ALTER TABLE IF EXISTS public.hallazgos
-    ADD CONSTRAINT hallazgos_dato_categoria_id_fkey FOREIGN KEY (dato_categoria_id)
+    ADD CONSTRAINT "hallazgos_dispositivoP_id_fkey" FOREIGN KEY ("dispositivoP_id")
+    REFERENCES public.dispositivos_plagas (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."hallazgos_datoCategoria"
+    ADD CONSTRAINT "hallazgos_datoCategoria_dato_categoria_id_fkey" FOREIGN KEY (dato_categoria_id)
     REFERENCES public.dato_categoria (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE CASCADE;
-CREATE INDEX IF NOT EXISTS hallazgos_diccionario_hallazgos_id_key
-    ON public.hallazgos(dato_categoria_id);
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS public."hallazgos_datoCategoria"
+    ADD CONSTRAINT "hallazgos_datoCategoria_hallazgo_id_fkey" FOREIGN KEY (hallazgo_id)
+    REFERENCES public.hallazgos (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
 
 
 ALTER TABLE IF EXISTS public.insumos
